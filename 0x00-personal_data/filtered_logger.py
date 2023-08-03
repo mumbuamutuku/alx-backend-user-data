@@ -4,9 +4,12 @@ a function called filter_datum that returns the log message obfuscated
 """
 
 import re
+from typing import List
+import logging
 
 
-def filter_datum(fields, redaction, message, separator):
+def filter_datum(fields: List[str], redaction: str, message: str,
+                 separator: str) -> str:
     """
     Arguments:
     fields: a list of strings representing all fields to obfuscate
@@ -17,3 +20,21 @@ def filter_datum(fields, redaction, message, separator):
     """
     pattern = r'({})'.format('|'.join(fields))
     return re.sub(pattern, redaction, message, flags=re.IGNORECASE)
+
+
+class RedactingFormatter(logging.Formatter):
+    """ Redacting Formatter class
+        """
+
+    REDACTION = "***"
+    FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
+    SEPARATOR = ";"
+
+    def __init__(self):
+        self.fields = fields
+        super(RedactingFormatter, self).__init__(self.FORMAT)
+
+    def format(self, record: logging.LogRecord) -> str:
+        message = super().format(record)
+        return filter_datum(self.fields, self.REDACTION,
+                            message, self.SEPARATOR)
