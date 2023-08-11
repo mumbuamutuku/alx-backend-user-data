@@ -3,7 +3,7 @@
 Auth py
 """
 
-from flask import request, Flask
+from flask import Flask, request
 from typing import List, TypeVar
 
 

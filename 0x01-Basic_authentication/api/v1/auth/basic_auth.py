@@ -87,9 +87,16 @@ class BasicAuth(Auth):
         - you must use the method is_valid_password of User
         Otherwise, return the User instance
         """
-        if (user_email and isinstance(user_email, str) or
-                (user_pwd and isinstance(user_pwd, str))):
-            return user
+        if not (user_email and isinstance(user_email, str) and
+                user_pwd and isinstance(user_pwd, str)):
+            return None
+        try:
+            users = User.search({'email': user_email})
+        except Exception:
+            return None
+        for user in users:
+            if user.is_valid_password(user_pwd):
+                return user
         return None
 
     def current_user(self, request=None) -> TypeVar('User'):
