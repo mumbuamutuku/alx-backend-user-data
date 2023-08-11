@@ -3,7 +3,7 @@
 Auth py
 """
 
-from flask import request
+from flask import request, Flask
 from typing import List, TypeVar
 
 
@@ -19,9 +19,37 @@ class Auth():
         Returns False if path is in excluded_paths
         """
         checkpath = path
-        if path is None or excluded_paths is None or len(excluded_paths) == 0:
+        if path is None or excluded_paths is None or not excluded_paths:
             return True
-        return False
+
+        if path[-1] == '/':
+            path = path[:-1]
+
+        contains_slash = False
+        for excluded_path in excluded_paths:
+            if excluded_path[-1] == '/':
+                excluded_path = excluded_path[:-1]
+                contains_slash = True
+
+            if excluded_path.endswith('*'):
+                idx_after_last_slash = excluded_path.rfind('/') + 1
+                excluded = excluded_path[idx_after_last_slash:-1]
+
+                idx_after_last_slash = path.rfind('/') + 1
+                tmp_path = path[idx_after_last_slash:]
+
+                if excluded in tmp_path:
+                    return False
+
+            if contains_slash:
+                contains_slash = False
+
+        path += '/'
+
+        if path in excluded_paths:
+            return False
+
+        return True
 
     def authorization_header(self, request=None) -> str:
         """
@@ -31,10 +59,11 @@ class Auth():
         """
         if request is None:
             return None
-        request.headers.get("Authorization")
+        return request.headers.get("Authorization")
 
     def current_user(self, request=None) -> TypeVar('User'):
         """
         returns None - request will be the Flask request object
         """
+        request = Flask(__name__)
         return None
