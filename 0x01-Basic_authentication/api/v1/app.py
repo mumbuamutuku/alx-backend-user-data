@@ -20,6 +20,7 @@ if getenv("AUTH_TYPE") == "auth":
 elif getenv("AUTH_TYPE") == "basic_auth":
     auth = BasicAuth()
 
+
 @app.errorhandler(404)
 def not_found(error) -> str:
     """ Not found handler
@@ -53,12 +54,16 @@ def forbidden(error) -> str:
 def before_request():
     """
     if auth is None, do nothing
-    if request.path is not part of this list ['/api/v1/status/', '/api/v1/unauthorized/', '/api/v1/forbidden/'], do nothing - you must use the method require_auth from the auth instance
-    if auth.authorization_header(request) returns None, raise the error 401 - you must use abort
-    if auth.current_user(request) returns None, raise the error 403 - you must use abort
+    if request.path is not part of this list ['/api/v1/status/',
+    '/api/v1/unauthorized/', '/api/v1/forbidden/'], do nothing
+    - you must use the method require_auth from the auth instance
+    if auth.authorization_header(request) returns None,
+    raise the error 401 - you must use abort
+    if auth.current_user(request) returns None,
+    raise the error 403 - you must use abort
     """
     authorizedList = ['/api/v1/status/',
-                       '/api/v1/unauthorized/', '/api/v1/forbidden/']
+                      '/api/v1/unauthorized/', '/api/v1/forbidden/']
     if auth and auth.require_auth(request.path, authorizedList):
         if not auth.authorization_header(request):
             abort(401)
