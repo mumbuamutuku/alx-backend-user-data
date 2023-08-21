@@ -68,13 +68,14 @@ def before_request():
     """
     authorizedList = ['/api/v1/status/',
                       '/api/v1/unauthorized/', '/api/v1/forbidden/']
-    if auth and auth.require_auth(request.path, authorizedList, []):
-        user = auth.current_user(request)
-        if not auth.authorization_header(request):
-            abort(401)
-        if not auth.current_user(request):
-            abort(403)
-        request.current_user = user
+    if auth:
+        if auth.require_auth(request.path, authorizedList):
+            user = auth.current_user(request)
+            if auth.authorization_header(request) is None:
+                abort(401)
+            if user is None:
+                abort(403)
+            request.current_user = user
 
 
 if __name__ == "__main__":
