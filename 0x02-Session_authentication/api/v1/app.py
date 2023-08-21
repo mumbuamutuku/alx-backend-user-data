@@ -55,7 +55,7 @@ def forbidden(error) -> str:
 
 
 @app.before_request
-def before_request():
+def authenticate_user():
     """
     if auth is None, do nothing
     if request.path is not part of this list ['/api/v1/status/',
@@ -66,10 +66,13 @@ def before_request():
     if auth.current_user(request) returns None,
     raise the error 403 - you must use abort
     """
-    authorizedList = ['/api/v1/status/',
-                      '/api/v1/unauthorized/', '/api/v1/forbidden/']
     if auth:
-        if auth.require_auth(request.path, authorizedList):
+        excluded_paths = ['/api/v1/status/',
+                          '/api/v1/unauthorized/',
+                          '/api/v1/forbidden/',
+                          '/api/v1/auth_session/login/',]
+        if request.path not in excluded_paths:
+        #if auth.require_auth(request.path, excluded_paths=excluded_paths):
             user = auth.current_user(request)
             if auth.authorization_header(request) is None:
                 abort(401)
